@@ -1,0 +1,8 @@
+# Temporary files and directories
+temp.zip
+temp3574.zip
+temp3574_unzipped/
+temp_desktop.zip
+temp_desktop_unzipped/
+temp_unzipped/
+*.zip
