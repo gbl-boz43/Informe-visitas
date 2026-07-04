@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header class="app-header">
+    <header class="app-header no-print">
         <div class="logo-container">
             <svg class="gemsa-logo" viewBox="0 0 240 60" width="160" height="40">
                 <defs>
@@ -33,8 +33,8 @@
     </header>
 
     <main class="app-container">
-        <!-- Panel de Entradas (Formulario) -->
-        <section class="panel panel-inputs" id="input-panel">
+        <!-- Panel de Entradas (Formulario) - oculto al imprimir -->
+        <section class="panel panel-inputs no-print" id="input-panel">
             <div class="card">
                 <div class="card-header">
                     <svg class="card-icon" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
@@ -58,7 +58,7 @@
                     </div>
                     <div class="form-group">
                         <label for="input-fecha">Fecha del Servicio / Reporte</label>
-                        <input type="text" id="input-fecha" placeholder="Ej. Del 25 al 27 de junio de 2026 o 4 de julio de 2026" required>
+                        <input type="text" id="input-fecha" placeholder="Ej. 4 de julio de 2026" required>
                     </div>
                 </div>
             </div>
@@ -118,19 +118,29 @@
         <!-- Panel de Vista Previa (Salida) -->
         <section class="panel panel-preview" id="preview-panel">
             <div class="preview-card">
-                <div class="preview-header">
+                <div class="preview-header no-print">
                     <div class="header-left">
-                        <span class="preview-badge">VISTA PREVIA EN TIEMPO REAL</span>
+                        <div class="tabs-container">
+                            <button type="button" class="tab-btn active" id="tab-text">Texto Plano</button>
+                            <button type="button" class="tab-btn" id="tab-doc">Vista de Documento (A4)</button>
+                        </div>
                     </div>
                     <div class="header-right">
+                        <!-- Acciones modo Texto -->
                         <button type="button" class="btn-primary" id="btn-copy" title="Copiar informe técnico al portapapeles">
                             <svg class="icon-btn" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                            <span id="copy-text">Copiar Informe</span>
+                            <span id="copy-text">Copiar Texto</span>
                         </button>
                         <button type="button" class="btn-secondary" id="btn-download-txt" title="Descargar como archivo de texto plano (.txt)">
                             <svg class="icon-btn" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                             <span>Descargar TXT</span>
                         </button>
+                        <!-- Acciones modo Documento (A4) -->
+                        <button type="button" class="btn-primary hidden" id="btn-print" title="Imprimir o guardar como PDF">
+                            <svg class="icon-btn" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                            <span>Imprimir / PDF</span>
+                        </button>
+                        <!-- Comunes -->
                         <button type="button" class="btn-danger" id="btn-clear" title="Reiniciar todos los campos">
                             <svg class="icon-btn" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                             <span>Limpiar</span>
@@ -138,14 +148,69 @@
                     </div>
                 </div>
                 <div class="preview-content">
-                    <pre id="output-text" class="report-output">Generando informe...</pre>
+                    <!-- Modo Texto -->
+                    <div id="text-preview-container" class="preview-mode-container">
+                        <pre id="output-text" class="report-output">Generando informe...</pre>
+                    </div>
+
+                    <!-- Modo Documento A4 (Imprimible) -->
+                    <div id="doc-preview-container" class="preview-mode-container hidden">
+                        <div class="a4-sheet" id="a4-sheet-element">
+                            <div class="sheet-header">
+                                <div class="sheet-logo">
+                                    <img src="logo.jpeg" alt="GEMSA LOGO" class="logo-img">
+                                </div>
+                                <div class="sheet-title-container">
+                                    <h1 class="sheet-title">INFORME TÉCNICO DE SERVICIO</h1>
+                                    <p class="sheet-subtitle">GEMSA CORPORACIÓN S.A.C.</p>
+                                </div>
+                            </div>
+                            
+                            <table class="metadata-table">
+                                <tr>
+                                    <td class="meta-label">Cliente:</td>
+                                    <td class="meta-val" id="sheet-cliente"></td>
+                                    <td class="meta-label">Código:</td>
+                                    <td class="meta-val" id="sheet-codigo"></td>
+                                </tr>
+                                <tr>
+                                    <td class="meta-label">Servicio:</td>
+                                    <td class="meta-val" id="sheet-nombre" colspan="3"></td>
+                                </tr>
+                                <tr>
+                                    <td class="meta-label">Fecha:</td>
+                                    <td class="meta-val" id="sheet-fecha" colspan="3"></td>
+                                </tr>
+                            </table>
+
+                            <div class="sheet-section">
+                                <h2 class="section-heading">1. Descripción</h2>
+                                <p class="section-paragraph" id="sheet-descripcion"></p>
+                            </div>
+
+                            <div class="sheet-section">
+                                <h2 class="section-heading">2. Reporte Fotográfico</h2>
+                                <div class="photos-grid-a4" id="sheet-photos">
+                                    <!-- Las fotos con su estructura se cargan aquí -->
+                                </div>
+                            </div>
+
+                            <div class="sheet-section">
+                                <h2 class="section-heading">3. Conclusiones y Recomendaciones</h2>
+                                <h3 class="subsection-heading">Conclusiones</h3>
+                                <ol class="sheet-list" id="sheet-conclusions"></ol>
+                                <h3 class="subsection-heading">Recomendaciones</h3>
+                                <ol class="sheet-list" id="sheet-recomendations"></ol>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
     </main>
 
-    <footer class="app-footer">
-        <p>&copy; 2026 GEMSA Corporación S.A.C. Todos los derechos reservados. | Sistema de Registro e Informes Técnicos de Campo v2.0</p>
+    <footer class="app-footer no-print">
+        <p>&copy; 2026 GEMSA Corporación S.A.C. Todos los derechos reservados. | Sistema de Registro e Informes Técnicos de Campo v2.5</p>
     </footer>
 
     <script src="app.js"></script>

@@ -23,7 +23,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnCopy = document.getElementById('btn-copy');
     const copyTextSpan = document.getElementById('copy-text');
     const btnDownloadTxt = document.getElementById('btn-download-txt');
+    const btnPrint = document.getElementById('btn-print');
     const btnClear = document.getElementById('btn-clear');
+
+    // Tab Switches Selectors
+    const tabText = document.getElementById('tab-text');
+    const tabDoc = document.getElementById('tab-doc');
+    const textContainer = document.getElementById('text-preview-container');
+    const docContainer = document.getElementById('doc-preview-container');
+
+    // A4 Sheet DOM Elements
+    const sheetCliente = document.getElementById('sheet-cliente');
+    const sheetCodigo = document.getElementById('sheet-codigo');
+    const sheetNombre = document.getElementById('sheet-nombre');
+    const sheetFecha = document.getElementById('sheet-fecha');
+    const sheetDescripcion = document.getElementById('sheet-descripcion');
+    const sheetPhotos = document.getElementById('sheet-photos');
+    const sheetConclusions = document.getElementById('sheet-conclusions');
+    const sheetRecomendations = document.getElementById('sheet-recomendations');
 
     // App State
     let state = {
@@ -98,6 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderConclusions();
         renderRecomendations();
         updateReportPreview();
+        updateA4SheetPreview();
     }
 
     // Sync State From UI Inputs
@@ -109,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
         state.descripcion = inputDescripcion.value.trim();
     }
 
-    // Render Conclusions List
+    // Render Conclusions Input List
     function renderConclusions() {
         conclusionsContainer.innerHTML = '';
         state.conclusions.forEach((text, index) => {
@@ -127,6 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
             li.querySelector('input').addEventListener('input', (e) => {
                 state.conclusions[index] = e.target.value;
                 updateReportPreview();
+                updateA4SheetPreview();
             });
 
             // Remove button handler
@@ -134,13 +153,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 state.conclusions.splice(index, 1);
                 renderConclusions();
                 updateReportPreview();
+                updateA4SheetPreview();
             });
 
             conclusionsContainer.appendChild(li);
         });
     }
 
-    // Render Recomendations List
+    // Render Recomendations Input List
     function renderRecomendations() {
         recomendationsContainer.innerHTML = '';
         state.recomendations.forEach((text, index) => {
@@ -158,6 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
             li.querySelector('input').addEventListener('input', (e) => {
                 state.recomendations[index] = e.target.value;
                 updateReportPreview();
+                updateA4SheetPreview();
             });
 
             // Remove button handler
@@ -165,13 +186,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 state.recomendations.splice(index, 1);
                 renderRecomendations();
                 updateReportPreview();
+                updateA4SheetPreview();
             });
 
             recomendationsContainer.appendChild(li);
         });
     }
 
-    // Render Photos List
+    // Render Photos Input List
     function renderPhotos() {
         photosContainer.innerHTML = '';
         state.photos.forEach((photo, index) => {
@@ -212,6 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         state.photos[index].previewUrl = event.target.result;
                         renderPhotos();
                         updateReportPreview();
+                        updateA4SheetPreview();
                     };
                     reader.readAsDataURL(file);
                 }
@@ -221,12 +244,14 @@ document.addEventListener('DOMContentLoaded', () => {
             item.querySelector('.photo-desc').addEventListener('input', (e) => {
                 state.photos[index].description = e.target.value;
                 updateReportPreview();
+                updateA4SheetPreview();
             });
 
             // DateTime input handler
             item.querySelector('.photo-datetime').addEventListener('input', (e) => {
                 state.photos[index].dateTime = e.target.value;
                 updateReportPreview();
+                updateA4SheetPreview();
             });
 
             // Remove button handler
@@ -234,13 +259,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 state.photos.splice(index, 1);
                 renderPhotos();
                 updateReportPreview();
+                updateA4SheetPreview();
             });
 
             photosContainer.appendChild(item);
         });
     }
 
-    // Build Formatted Report Text
+    // Build Formatted Report Plain Text
     function buildReportText() {
         const clienteText = state.cliente || '[Nombre del Cliente / Empresa]';
         const codigoText = state.codigo || '[IT-2026-XXXX]';
@@ -293,16 +319,108 @@ document.addEventListener('DOMContentLoaded', () => {
         return report;
     }
 
-    // Update Report Text Area Preview
+    // Update Report Plain Text Area Preview
     function updateReportPreview() {
         outputText.textContent = buildReportText();
     }
 
-    // Event Listeners for Dynamic Addition Buttons
+    // Update A4 Document Sheet HTML Preview
+    function updateA4SheetPreview() {
+        sheetCliente.textContent = state.cliente || '---';
+        sheetCodigo.textContent = state.codigo || '---';
+        sheetNombre.textContent = state.nombre || '---';
+        sheetFecha.textContent = state.fecha || '---';
+        sheetDescripcion.textContent = state.descripcion || '---';
+
+        // Render Photos in A4 layout
+        sheetPhotos.innerHTML = '';
+        if (state.photos.length === 0) {
+            sheetPhotos.innerHTML = '<div style="grid-column: span 2; text-align: center; color: #94a3b8; font-style: italic; padding: 1.5rem;">Ninguna fotografía agregada al reporte.</div>';
+        } else {
+            state.photos.forEach((photo, index) => {
+                const card = document.createElement('div');
+                card.className = 'sheet-photo-card';
+                card.innerHTML = `
+                    <div class="sheet-photo-img-wrapper">
+                        ${photo.previewUrl ? `<img src="${photo.previewUrl}">` : `
+                            <div class="sheet-photo-placeholder">
+                                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                                <span>Sin Imagen</span>
+                            </div>
+                        `}
+                    </div>
+                    <div class="sheet-photo-desc">Foto ${index + 1}: ${photo.description || '---'}</div>
+                    <div class="sheet-photo-time">Fecha / Hora: ${photo.dateTime || '---'}</div>
+                `;
+                sheetPhotos.appendChild(card);
+            });
+        }
+
+        // Render Conclusions in A4 layout
+        sheetConclusions.innerHTML = '';
+        if (state.conclusions.length === 0) {
+            sheetConclusions.innerHTML = '<li>---</li>';
+        } else {
+            state.conclusions.forEach(c => {
+                if (c.trim()) {
+                    const li = document.createElement('li');
+                    li.textContent = c.trim();
+                    sheetConclusions.appendChild(li);
+                }
+            });
+        }
+
+        // Render Recommendations in A4 layout
+        sheetRecomendations.innerHTML = '';
+        if (state.recomendations.length === 0) {
+            sheetRecomendations.innerHTML = '<li>---</li>';
+        } else {
+            state.recomendations.forEach(r => {
+                if (r.trim()) {
+                    const li = document.createElement('li');
+                    li.textContent = r.trim();
+                    sheetRecomendations.appendChild(li);
+                }
+            });
+        }
+    }
+
+    // Tab Switches Event Listeners
+    tabText.addEventListener('click', () => {
+        tabText.classList.add('active');
+        tabDoc.classList.remove('active');
+        textContainer.classList.remove('hidden');
+        docContainer.classList.add('hidden');
+        
+        btnCopy.classList.remove('hidden');
+        btnDownloadTxt.classList.remove('hidden');
+        btnPrint.classList.add('hidden');
+    });
+
+    tabDoc.addEventListener('click', () => {
+        tabDoc.classList.add('active');
+        tabText.classList.remove('active');
+        docContainer.classList.remove('hidden');
+        textContainer.classList.add('hidden');
+        
+        btnCopy.classList.add('hidden');
+        btnDownloadTxt.classList.add('hidden');
+        btnPrint.classList.remove('hidden');
+        
+        updateA4SheetPreview();
+    });
+
+    // Action: Print / PDF
+    btnPrint.addEventListener('click', () => {
+        window.print();
+    });
+
+    // Event Listeners for Dynamic Additions
     btnGenCode.addEventListener('click', () => {
         inputCodigo.value = generateRandomCode();
         syncStateFromInputs();
         updateReportPreview();
+        updateA4SheetPreview();
     });
 
     btnAddPhoto.addEventListener('click', () => {
@@ -314,18 +432,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         renderPhotos();
         updateReportPreview();
+        updateA4SheetPreview();
     });
 
     btnAddConclusion.addEventListener('click', () => {
         state.conclusions.push('');
         renderConclusions();
         updateReportPreview();
+        updateA4SheetPreview();
     });
 
     btnAddRecomendation.addEventListener('click', () => {
         state.recomendations.push('');
         renderRecomendations();
         updateReportPreview();
+        updateA4SheetPreview();
     });
 
     // Form Change listeners
@@ -333,6 +454,7 @@ document.addEventListener('DOMContentLoaded', () => {
         input.addEventListener('input', () => {
             syncStateFromInputs();
             updateReportPreview();
+            updateA4SheetPreview();
         });
     });
 
@@ -346,7 +468,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             setTimeout(() => {
                 btnCopy.classList.remove('copy-success');
-                copyTextSpan.textContent = 'Copiar Informe';
+                copyTextSpan.textContent = 'Copiar Texto';
             }, 2000);
         } catch (err) {
             console.error('Error al copiar el texto: ', err);
@@ -395,6 +517,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderConclusions();
             renderRecomendations();
             updateReportPreview();
+            updateA4SheetPreview();
         }
     });
 
